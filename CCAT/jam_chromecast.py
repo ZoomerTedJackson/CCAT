@@ -165,9 +165,6 @@ print '''
 
 ChromeCast Attackers Toolkit
 
-
-Chevy Swanson - Trent Kenny - Benjamin Donnelly
-
 '''
 
 
