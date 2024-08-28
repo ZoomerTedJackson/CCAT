@@ -1,3 +1,7 @@
+***I made this in High School so i could click a button and turn off all chromecasts on the network as a POC of how bad IOT devices are designed. It worked, but then i got bored and never bothered making more tools.
+
+
+
 Simple script to detect Google Chromecasts on your network and then jam them by sending infinite, continuous requests to display something. 
 
 Practically forces a blank screen until you unplug the device. 
